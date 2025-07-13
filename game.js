@@ -1,4 +1,11 @@
+
 // --- Configuración Básica de la Escena ---
+
+// Verificar si WebGL está disponible
+if ( WEBGL.isWebGLAvailable() === false ) {
+	document.body.appendChild( WEBGL.getWebGLContextErrorMessage() );
+}
+
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xfab77a); // Color de cielo atardecer
 scene.fog = new THREE.Fog(0xfab77a, 10, 50); // Niebla que empieza a 10 unidades y es total a 50
@@ -15,32 +22,31 @@ console.log("Canvas adjuntado al body:", document.body.contains(renderer.domElem
 
 // Un suelo simple
 const groundGeometry = new THREE.PlaneGeometry(50, 50);
-const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x966939, roughness: 0.9, metalness: 0.1 });
+const groundMaterial = new THREE.MeshBasicMaterial({ color: 0x966939, side: THREE.DoubleSide }); // Material básico
 const ground = new THREE.Mesh(groundGeometry, groundMaterial);
 ground.rotation.x = -Math.PI / 2; // Rotamos el plano para que sea el suelo
-ground.receiveShadow = true;
+// ground.receiveShadow = true; // Desactivado
 scene.add(ground);
 
 // Una esfera de prueba en el origen
 const sphereGeometry = new THREE.SphereGeometry(1, 32, 32);
-const sphereMaterial = new THREE.MeshStandardMaterial({ color: 0x00ff00 }); // Verde brillante
+const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 }); // Material básico
 const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
 sphere.position.set(0, 1, 0); // En el origen, un poco elevada
-sphere.castShadow = true;
+// sphere.castShadow = true; // Desactivado
 scene.add(sphere);
 
-// Una luz ambiental cálida
+// Luces (MeshBasicMaterial no las necesita, pero las dejamos por si acaso)
 const ambientLight = new THREE.AmbientLight(0xffdcb2, 0.5);
 scene.add(ambientLight);
 
-// Una luz direccional (sol) anaranjada para sombras dramáticas
 const directionalLight = new THREE.DirectionalLight(0xff9933, 1);
 directionalLight.position.set(10, 20, 5);
-directionalLight.castShadow = true; // Habilitamos las sombras
+// directionalLight.castShadow = true; // Desactivado
 scene.add(directionalLight);
 
-// Configuración de sombras
-renderer.shadowMap.enabled = true;
+// Configuración de sombras (desactivada)
+// renderer.shadowMap.enabled = true;
 
 // Posición inicial de la cámara
 camera.position.set(0, 5, 10); // Elevada y hacia atrás para ver la esfera
