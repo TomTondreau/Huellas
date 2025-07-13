@@ -66,6 +66,7 @@ document.addEventListener('touchend', (event) => {
 });
 
 function takeStep(fingerId) {
+    console.log("Step taken! Camera Y: " + cameraY); // Mensaje de depuración
     let currentTerrainName = 'tierra'; // Por defecto
     // Determinar el terreno actual basado en cameraY
     let totalLength = 0;
