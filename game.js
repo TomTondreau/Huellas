@@ -1,60 +1,35 @@
+// --- Configuración del Canvas 2D ---
+const canvas = document.createElement('canvas');
+document.body.appendChild(canvas);
+const ctx = canvas.getContext('2d');
 
-// --- Configuración Básica de la Escena ---
+// Ajustar el tamaño del canvas a la ventana
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas(); // Llamar al inicio para establecer el tamaño inicial
 
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xfab77a); // Color de cielo atardecer
-scene.fog = new THREE.Fog(0xfab77a, 10, 50); // Niebla que empieza a 10 unidades y es total a 50
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-const renderer = new THREE.WebGLRenderer({
-    antialias: true // Suaviza los bordes
-});
-
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
-console.log("Canvas adjuntado al body:", document.body.contains(renderer.domElement)); // Línea de depuración
-
-// --- Objetos de la Escena ---
-
-// Un suelo simple
-const groundGeometry = new THREE.PlaneGeometry(50, 50);
-const groundMaterial = new THREE.MeshBasicMaterial({ color: 0x966939, side: THREE.DoubleSide }); // Material básico
-const ground = new THREE.Mesh(groundGeometry, groundMaterial);
-ground.rotation.x = -Math.PI / 2; // Rotamos el plano para que sea el suelo
-// ground.receiveShadow = true; // Desactivado
-scene.add(ground);
-
-// Una esfera de prueba en el origen
-const sphereGeometry = new THREE.SphereGeometry(1, 32, 32);
-const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 }); // Material básico
-const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-sphere.position.set(0, 1, 0); // En el origen, un poco elevada
-// sphere.castShadow = true; // Desactivado
-scene.add(sphere);
-
-// Luces (MeshBasicMaterial no las necesita, pero las dejamos por si acaso)
-const ambientLight = new THREE.AmbientLight(0xffdcb2, 0.5);
-scene.add(ambientLight);
-
-const directionalLight = new THREE.DirectionalLight(0xff9933, 1);
-directionalLight.position.set(10, 20, 5);
-// directionalLight.castShadow = true; // Desactivado
-scene.add(directionalLight);
-
-// Configuración de sombras (desactivada)
-// renderer.shadowMap.enabled = true;
-
-// Posición inicial de la cámara
-camera.position.set(0, 5, 10); // Elevada y hacia atrás para ver la esfera
-camera.lookAt(0, 1, 0); // Mirando a la esfera
-
-
-// --- Lógica de Control (desactivada por ahora) ---
-const moveSpeed = 0.1; // Velocidad de avance por paso
+// --- Variables del Juego ---
+const moveSpeed = 5; // Velocidad de avance por paso en píxeles
 const stepDistance = 50; // Distancia en píxeles para un paso
 
 let lastStepFingerId = -1;
 const touchStartPositions = {};
 
+// Posición actual de la cámara (simulada en 2D)
+let cameraY = 0; // Usaremos Y para simular el avance en el camino
+
+// Definición de los segmentos de terreno (color y longitud)
+const terrainSegments = [
+    { name: 'tierra', color: '#966939', length: 800 },
+    { name: 'lodo', color: '#5C4033', length: 800 },
+    { name: 'hielo', color: '#FFFFFF', length: 800 },
+    { name: 'adoquin', color: '#505050', length: 800 }
+];
+
+// --- Lógica de Control Táctil ---
 document.addEventListener('touchstart', (event) => {
     for (let i = 0; i < event.changedTouches.length; i++) {
         const touch = event.changedTouches[i];
@@ -63,20 +38,18 @@ document.addEventListener('touchstart', (event) => {
 });
 
 document.addEventListener('touchmove', (event) => {
-    // Prevenir el scroll del navegador en móviles
-    event.preventDefault();
+    event.preventDefault(); // Prevenir el scroll del navegador
 
     for (let i = 0; i < event.changedTouches.length; i++) {
         const touch = event.changedTouches[i];
         
-        // Solo procesamos si el dedo es diferente al último que dio un paso
         if (touch.identifier !== lastStepFingerId) {
             const startY = touchStartPositions[touch.identifier];
             const currentY = touch.clientY;
             const swipeDistance = startY - currentY; // Invertido porque Y crece hacia abajo
 
             if (swipeDistance > stepDistance) {
-                // takeStep(touch.identifier); // Desactivado para depuración
+                takeStep(touch.identifier);
             }
         }
     }
@@ -85,8 +58,6 @@ document.addEventListener('touchmove', (event) => {
 document.addEventListener('touchend', (event) => {
     for (let i = 0; i < event.changedTouches.length; i++) {
         const touch = event.changedTouches[i];
-        // Si el dedo que se levanta es el que dio el último paso,
-        // permitimos que cualquier otro dedo pueda dar el siguiente.
         if (touch.identifier === lastStepFingerId) {
             lastStepFingerId = -1;
         }
@@ -95,29 +66,78 @@ document.addEventListener('touchend', (event) => {
 });
 
 function takeStep(fingerId) {
-    // Lógica de movimiento desactivada por ahora
+    let currentTerrainName = 'tierra'; // Por defecto
+    // Determinar el terreno actual basado en cameraY
+    let totalLength = 0;
+    for(let i = 0; i < terrainSegments.length; i++) {
+        totalLength += terrainSegments[i].length;
+        if (cameraY % totalLength < totalLength - terrainSegments[i].length) {
+            currentTerrainName = terrainSegments[i].name;
+            break;
+        }
+    }
+
+    let stepSpeed = moveSpeed;
+    let vibrationPattern = [50];
+
+    switch (currentTerrainName) {
+        case 'lodo':
+            stepSpeed *= 0.7;
+            vibrationPattern = [100];
+            break;
+        case 'hielo':
+            stepSpeed *= 1.5;
+            vibrationPattern = [20];
+            break;
+        case 'adoquin':
+            stepSpeed *= 1.0;
+            vibrationPattern = [30, 20, 30];
+            break;
+        case 'tierra':
+        default:
+            break;
+    }
+
+    cameraY += stepSpeed; // Mover la cámara
+
+    lastStepFingerId = fingerId;
+
+    if (navigator.vibrate) {
+        navigator.vibrate(vibrationPattern);
+    }
 }
 
-// --- Bucle de Animación ---
+// --- Bucle de Dibujo y Actualización ---
+function gameLoop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height); // Limpiar el canvas
 
-let currentTerrain = 'tierra';
-const raycaster = new THREE.Raycaster();
+    // Dibujar el cielo (degradado)
+    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    gradient.addColorStop(0, '#fab77a'); // Color superior (atardecer)
+    gradient.addColorStop(1, '#ff8c00'); // Color inferior (horizonte)
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-function animate() {
-    requestAnimationFrame(animate);
+    // Dibujar los segmentos de terreno
+    let currentY = canvas.height; // Empezar a dibujar desde la parte inferior
+    let segmentOffset = cameraY % (terrainSegments.reduce((sum, seg) => sum + seg.length, 0));
 
-    // Raycasting para detectar el terreno (desactivado por ahora)
-    // const intersects = raycaster.intersectObjects(grounds.children);
-    // if (intersects.length > 0) { currentTerrain = intersects[0].object.name; }
+    for (let i = 0; i < terrainSegments.length; i++) {
+        const segment = terrainSegments[i];
+        ctx.fillStyle = segment.color;
+        
+        // Calcular la posición y altura del segmento en la pantalla
+        let segmentHeight = segment.length;
+        let drawY = currentY - segmentHeight + segmentOffset;
 
-    renderer.render(scene, camera);
+        // Asegurarse de que el segmento esté visible en la pantalla
+        if (drawY < canvas.height && drawY + segmentHeight > 0) {
+            ctx.fillRect(0, drawY, canvas.width, segmentHeight);
+        }
+        currentY -= segment.length;
+    }
+
+    requestAnimationFrame(gameLoop);
 }
 
-animate();
-
-// --- Manejo del Redimensionamiento de la Ventana ---
-window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-});
+gameLoop();
