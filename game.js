@@ -29,44 +29,29 @@ const terrainSegments = [
     { name: 'adoquin', color: '#505050', length: 800 }
 ];
 
-// --- Lógica de Control Táctil ---
-document.addEventListener('touchstart', (event) => {
-    for (let i = 0; i < event.changedTouches.length; i++) {
-        const touch = event.changedTouches[i];
-        touchStartPositions[touch.identifier] = touch.clientY;
+
+// --- Lógica de Control Táctil (con ZingTouch) ---
+const region = new ZingTouch.Region(canvas); // Inicializar ZingTouch en el canvas
+
+// Variables para la lógica de paso alternado
+let lastStepFingerId = -1;
+const touchStartPositions = {};
+
+// Gesto de Pan (deslizamiento) de dos dedos
+region.bind(canvas, 'pan', function(e) {
+    // Asegurarse de que sean dos toques
+    if (e.detail.touches.length === 2) {
+        const touch1 = e.detail.touches[0];
+        const touch2 = e.detail.touches[1];
+
+        // Lógica para detectar el paso alternado
+        // Esto es una simplificación inicial, la lógica real será más compleja
+        // Por ahora, cualquier deslizamiento de dos dedos activará un paso
+        takeStep(touch1.identifier); // Usamos el ID del primer dedo como referencia
     }
-});
-
-document.addEventListener('touchmove', (event) => {
-    event.preventDefault(); // Prevenir el scroll del navegador
-
-    for (let i = 0; i < event.changedTouches.length; i++) {
-        const touch = event.changedTouches[i];
-        
-        if (touch.identifier !== lastStepFingerId) {
-            const startY = touchStartPositions[touch.identifier];
-            const currentY = touch.clientY;
-            const swipeDistance = startY - currentY; // Invertido porque Y crece hacia abajo
-
-            if (swipeDistance > stepDistance) {
-                takeStep(touch.identifier);
-            }
-        }
-    }
-}, { passive: false });
-
-document.addEventListener('touchend', (event) => {
-    for (let i = 0; i < event.changedTouches.length; i++) {
-        const touch = event.changedTouches[i];
-        if (touch.identifier === lastStepFingerId) {
-            lastStepFingerId = -1;
-        }
-        delete touchStartPositions[touch.identifier];
-    }
-});
+}, { numInputs: 2 }); // Solo detectar con 2 dedos
 
 function takeStep(fingerId) {
-    console.log("Step taken! Camera Y: " + cameraY); // Mensaje de depuración
     let currentTerrainName = 'tierra'; // Por defecto
     // Determinar el terreno actual basado en cameraY
     let totalLength = 0;
@@ -109,6 +94,7 @@ function takeStep(fingerId) {
 }
 
 // --- Bucle de Dibujo y Actualización ---
+
 function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height); // Limpiar el canvas
 
