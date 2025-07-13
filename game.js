@@ -35,6 +35,7 @@ const region = new ZingTouch.Region(canvas); // Inicializar ZingTouch en el canv
 
 // Gesto de Pan (deslizamiento) de dos dedos
 region.bind(canvas, 'pan', function(e) {
+    console.log("ZingTouch Pan event detected!"); // Nuevo mensaje de depuración
     // Asegurarse de que sean dos toques
     if (e.detail.touches.length === 2) {
         const touch1 = e.detail.touches[0];
