@@ -33,10 +33,6 @@ const terrainSegments = [
 // --- Lógica de Control Táctil (con ZingTouch) ---
 const region = new ZingTouch.Region(canvas); // Inicializar ZingTouch en el canvas
 
-// Variables para la lógica de paso alternado
-let lastStepFingerId = -1;
-const touchStartPositions = {};
-
 // Gesto de Pan (deslizamiento) de dos dedos
 region.bind(canvas, 'pan', function(e) {
     // Asegurarse de que sean dos toques
