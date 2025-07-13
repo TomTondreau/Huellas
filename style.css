@@ -1,5 +1,6 @@
 
-body {
+html, body {
+    height: 100%;
     margin: 0;
     overflow: hidden; /* Evita las barras de scroll */
     background-color: #000;
