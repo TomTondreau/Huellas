@@ -143,6 +143,13 @@ renderer.shadowMap.enabled = true;
 camera.position.set(0, 2, -5); // Un poco elevada y hacia atrás
 camera.lookAt(0, 0, 0); // Mirando al centro de la escena
 
+// Cubo de prueba (temporal)
+const boxGeometry = new THREE.BoxGeometry(1, 1, 1);
+const boxMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 }); // Verde brillante
+const box = new THREE.Mesh(boxGeometry, boxMaterial);
+box.position.set(0, 2, -3); // Delante de la cámara
+scene.add(box);
+
 
 // --- Lógica de Control ---
 const moveSpeed = 0.1; // Velocidad de avance por paso
