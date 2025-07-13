@@ -1,4 +1,6 @@
 
+console.error("GAME.JS IS RUNNING!"); // Mensaje de depuración
+
 // --- Configuración Básica de la Escena ---
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xfab77a); // Color de cielo atardecer
