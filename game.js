@@ -1,11 +1,6 @@
 
 // --- Configuración Básica de la Escena ---
 
-// Verificar si WebGL está disponible
-if ( WEBGL.isWebGLAvailable() === false ) {
-	document.body.appendChild( WEBGL.getWebGLContextErrorMessage() );
-}
-
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xfab77a); // Color de cielo atardecer
 scene.fog = new THREE.Fog(0xfab77a, 10, 50); // Niebla que empieza a 10 unidades y es total a 50
