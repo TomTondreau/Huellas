@@ -10,6 +10,7 @@ const renderer = new THREE.WebGLRenderer({
 
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
+console.log("Canvas adjuntado al body:", document.body.contains(renderer.domElement)); // Línea de depuración
 
 // --- Objetos de la Escena ---
 
