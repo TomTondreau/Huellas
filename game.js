@@ -60,6 +60,12 @@ document.addEventListener('DOMContentLoaded', function() {
         takeStep(touch1.identifier); // Usamos el ID del primer dedo como referencia
     }
 }, { numInputs: 2 }); // Solo detectar con 2 dedos
+
+        // Gesto de Tap (toque simple)
+        region.bind(canvas, 'tap', function(e) {
+            console.log("ZingTouch Tap event detected!");
+            currentDebugColor = 'purple'; // Debug visual: Canvas morado si se detecta Tap
+        });
     } else {
         console.error("ZingTouch is NOT defined. Touch events will not work.");
         // Debug visual: Canvas negro si ZingTouch NO está definido
