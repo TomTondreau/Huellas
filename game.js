@@ -12,6 +12,16 @@ const speedDisplay = document.getElementById('speedDisplay');
 const terrainDisplay = document.getElementById('terrainDisplay');
 const instructionsDisplay = document.getElementById('instructionsDisplay');
 
+// Imágenes de huellas
+const footprintLeftImg = new Image();
+footprintLeftImg.src = './images/footprint_left.svg';
+const footprintRightImg = new Image();
+footprintRightImg.src = './images/footprint_right.svg';
+
+// Array para almacenar las huellas activas
+const footprints = [];
+const FOOTPRINT_LIFESPAN = 1000; // Duración de la huella en milisegundos
+
 // Ajustar el tamaño del canvas a la ventana
 function resizeCanvas() {
     canvas.width = window.innerWidth;
@@ -35,6 +45,7 @@ const touchStartPositions = {};
 let cameraY = 0; // Usaremos Y para simular el avance en el camino
 let lastCameraY = 0; // Para calcular la velocidad
 let currentSpeed = 0; // Velocidad actual
+let isLeftFootNext = true; // Para alternar las huellas izquierda y derecha
 
 // Definición de los segmentos de terreno (color y longitud)
 const terrainSegments = [
@@ -147,6 +158,13 @@ function takeStep(fingerId) {
 
     cameraY += stepSpeed; // Mover la cámara
 
+    // Añadir una huella al array
+    const footprintX = Math.random() * (canvas.width - 50); // Posición X aleatoria
+    const footprintY = canvas.height - 50; // Posición Y en la parte inferior del canvas
+    const footprintType = isLeftFootNext ? 'left' : 'right'; // Alternar huellas
+    footprints.push({ x: footprintX, y: footprintY, type: footprintType, creationTime: Date.now() });
+    isLeftFootNext = !isLeftFootNext; // Alternar para el siguiente paso
+
     lastStepFingerId = fingerId;
 
     if (navigator.vibrate) {
@@ -163,9 +181,7 @@ function gameLoop() {
     const distanceCoveredPx = cameraY - lastCameraY; // Distancia recorrida en este frame en píxeles
     const distanceCoveredMeters = distanceCoveredPx / PIXELS_PER_METER; // Distancia en metros
     const speedMps = distanceCoveredMeters * FPS; // Velocidad en metros por segundo
-    const speedKph = speedMps * 3.6; // Velocidad en kilómetros por hora (1 m/s = 3.6 km/h)
-
-    speedDisplay.textContent = `Velocidad: ${speedKph.toFixed(2)} km/h`;
+    speedDisplay.textContent = `Velocidad: ${speedMps.toFixed(2)} m/s`;
     lastCameraY = cameraY;
 
     // Mostrar la distancia en kilómetros
@@ -196,6 +212,24 @@ function gameLoop() {
             ctx.fillRect(0, drawY, canvas.width, segmentHeight);
         }
         currentY -= segment.length;
+    }
+
+    // Dibujar huellas
+    const now = Date.now();
+    for (let i = footprints.length - 1; i >= 0; i--) {
+        const footprint = footprints[i];
+        const elapsedTime = now - footprint.creationTime;
+        const alpha = 1 - (elapsedTime / FOOTPRINT_LIFESPAN);
+
+        if (alpha > 0) {
+            ctx.save();
+            ctx.globalAlpha = alpha;
+            const img = (footprint.type === 'left') ? footprintLeftImg : footprintRightImg;
+            ctx.drawImage(img, footprint.x, footprint.y - (cameraY % canvas.height), 50, 50); // Ajustar Y con cameraY
+            ctx.restore();
+        } else {
+            footprints.splice(i, 1); // Eliminar huellas que ya no son visibles
+        }
     }
 
     requestAnimationFrame(gameLoop);
