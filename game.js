@@ -21,11 +21,8 @@ window.addEventListener('resize', resizeCanvas);
 resizeCanvas(); // Llamar al inicio para establecer el tamaño inicial
 
 // --- Variables del Juego ---
-const moveSpeed = 2.33; // Velocidad de avance por paso en píxeles (ajustada para simular 1.4 m/s a 60 FPS)
-const stepDistance = 50; // Distancia en píxeles para un paso
-
 // Constantes de conversión
-const PIXELS_PER_METER = 100; // 100 píxeles = 1 metro
+const PIXELS_PER_METER = 500; // 500 píxeles = 1 metro (ajustado para mayor dificultad y realismo)
 const FPS = 60; // Asumiendo 60 fotogramas por segundo
 const STEP_LENGTH_METERS = 0.7; // Longitud de un paso humano en metros
 const STEP_LENGTH_PIXELS = STEP_LENGTH_METERS * PIXELS_PER_METER; // Longitud de un paso en píxeles
