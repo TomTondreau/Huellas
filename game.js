@@ -1,3 +1,5 @@
+console.log("game.js loaded");
+
 // --- Configuración del Canvas 2D ---
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
