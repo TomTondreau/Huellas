@@ -1,13 +1,13 @@
+let currentDebugColor = null;
 console.log("game.js loaded");
-
-// Debug visual: Canvas azul al cargar game.js
-ctx.fillStyle = 'blue';
-ctx.fillRect(0, 0, canvas.width, canvas.height);
 
 // --- Configuración del Canvas 2D ---
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 const ctx = canvas.getContext('2d');
+
+// Debug visual: Canvas azul al cargar game.js y canvas listo
+currentDebugColor = 'blue';
 
 // Ajustar el tamaño del canvas a la ventana
 function resizeCanvas() {
@@ -41,16 +41,14 @@ document.addEventListener('DOMContentLoaded', function() {
     if (typeof ZingTouch !== 'undefined') {
         console.log("ZingTouch is defined. Initializing region.");
         // Debug visual: Canvas verde si ZingTouch está definido
-        ctx.fillStyle = 'green';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        currentDebugColor = 'green';
         const region = new ZingTouch.Region(canvas); // Inicializar ZingTouch en el canvas
 
         // Gesto de Pan (deslizamiento) de dos dedos
         region.bind(canvas, 'pan', function(e) {
     console.log("ZingTouch Pan event detected!"); // Nuevo mensaje de depuración
     // Debug visual: Canvas rojo si se detecta Pan
-    ctx.fillStyle = 'red';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    currentDebugColor = 'red';
     // Asegurarse de que sean dos toques
     if (e.detail.touches.length === 2) {
         const touch1 = e.detail.touches[0];
@@ -65,8 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
         console.error("ZingTouch is NOT defined. Touch events will not work.");
         // Debug visual: Canvas negro si ZingTouch NO está definido
-        ctx.fillStyle = 'black';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        currentDebugColor = 'black';
     }
 });
 
@@ -116,6 +113,14 @@ function takeStep(fingerId) {
 
 function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height); // Limpiar el canvas
+
+    // Si hay un color de depuración, dibujarlo y salir
+    if (currentDebugColor) {
+        ctx.fillStyle = currentDebugColor;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        requestAnimationFrame(gameLoop);
+        return; // Salir del bucle para no dibujar el juego normal
+    }
 
     // Dibujar el cielo (degradado)
     const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
