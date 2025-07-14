@@ -1,5 +1,9 @@
 console.log("game.js loaded");
 
+// Debug visual: Canvas azul al cargar game.js
+ctx.fillStyle = 'blue';
+ctx.fillRect(0, 0, canvas.width, canvas.height);
+
 // --- Configuración del Canvas 2D ---
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -36,11 +40,17 @@ const terrainSegments = [
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof ZingTouch !== 'undefined') {
         console.log("ZingTouch is defined. Initializing region.");
+        // Debug visual: Canvas verde si ZingTouch está definido
+        ctx.fillStyle = 'green';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
         const region = new ZingTouch.Region(canvas); // Inicializar ZingTouch en el canvas
 
         // Gesto de Pan (deslizamiento) de dos dedos
         region.bind(canvas, 'pan', function(e) {
     console.log("ZingTouch Pan event detected!"); // Nuevo mensaje de depuración
+    // Debug visual: Canvas rojo si se detecta Pan
+    ctx.fillStyle = 'red';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     // Asegurarse de que sean dos toques
     if (e.detail.touches.length === 2) {
         const touch1 = e.detail.touches[0];
@@ -54,6 +64,9 @@ document.addEventListener('DOMContentLoaded', function() {
 }, { numInputs: 2 }); // Solo detectar con 2 dedos
     } else {
         console.error("ZingTouch is NOT defined. Touch events will not work.");
+        // Debug visual: Canvas negro si ZingTouch NO está definido
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 });
 
