@@ -31,10 +31,13 @@ const terrainSegments = [
 
 
 // --- Lógica de Control Táctil (con ZingTouch) ---
-const region = new ZingTouch.Region(canvas); // Inicializar ZingTouch en el canvas
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof ZingTouch !== 'undefined') {
+        console.log("ZingTouch is defined. Initializing region.");
+        const region = new ZingTouch.Region(canvas); // Inicializar ZingTouch en el canvas
 
-// Gesto de Pan (deslizamiento) de dos dedos
-region.bind(canvas, 'pan', function(e) {
+        // Gesto de Pan (deslizamiento) de dos dedos
+        region.bind(canvas, 'pan', function(e) {
     console.log("ZingTouch Pan event detected!"); // Nuevo mensaje de depuración
     // Asegurarse de que sean dos toques
     if (e.detail.touches.length === 2) {
@@ -47,6 +50,10 @@ region.bind(canvas, 'pan', function(e) {
         takeStep(touch1.identifier); // Usamos el ID del primer dedo como referencia
     }
 }, { numInputs: 2 }); // Solo detectar con 2 dedos
+    } else {
+        console.error("ZingTouch is NOT defined. Touch events will not work.");
+    }
+});
 
 function takeStep(fingerId) {
     let currentTerrainName = 'tierra'; // Por defecto
