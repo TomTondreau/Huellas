@@ -12,16 +12,6 @@ const speedDisplay = document.getElementById('speedDisplay');
 const terrainDisplay = document.getElementById('terrainDisplay');
 const instructionsDisplay = document.getElementById('instructionsDisplay');
 
-// Imágenes de huellas
-const footprintLeftImg = new Image();
-footprintLeftImg.src = './images/footprint_left.svg';
-const footprintRightImg = new Image();
-footprintRightImg.src = './images/footprint_right.svg';
-
-// Array para almacenar las huellas activas
-const footprints = [];
-const FOOTPRINT_LIFESPAN = 1000; // Duración de la huella en milisegundos
-
 // Ajustar el tamaño del canvas a la ventana
 function resizeCanvas() {
     canvas.width = window.innerWidth;
@@ -45,7 +35,6 @@ const touchStartPositions = {};
 let cameraY = 0; // Usaremos Y para simular el avance en el camino
 let lastCameraY = 0; // Para calcular la velocidad
 let currentSpeed = 0; // Velocidad actual
-let isLeftFootNext = true; // Para alternar las huellas izquierda y derecha
 
 // Definición de los segmentos de terreno (color y longitud)
 const terrainSegments = [
@@ -158,17 +147,6 @@ function takeStep(fingerId) {
 
     cameraY += stepSpeed; // Mover la cámara
 
-    // Añadir una huella al array
-    const footprintWidth = 50;
-    const footprintHeight = 100;
-    const centerX = canvas.width / 2;
-    const offset = 20; // Distancia desde el centro para cada huella
-    const footprintX = isLeftFootNext ? centerX - offset - footprintWidth / 2 : centerX + offset - footprintWidth / 2;
-    const footprintY = canvas.height - footprintHeight; // Posición Y en la parte inferior del canvas
-    const footprintType = isLeftFootNext ? 'left' : 'right'; // Alternar huellas
-    footprints.push({ x: footprintX, y: footprintY, type: footprintType, creationTime: Date.now(), width: footprintWidth, height: footprintHeight });
-    isLeftFootNext = !isLeftFootNext; // Alternar para el siguiente paso
-
     lastStepFingerId = fingerId;
 
     if (navigator.vibrate) {
@@ -199,14 +177,6 @@ function gameLoop() {
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Dibujar el sendero
-    const pathWidth = 100; // Ancho del sendero
-    const pathColor = 'rgba(255, 255, 255, 0.3)'; // Color del sendero (blanco semitransparente)
-    const pathX = (canvas.width / 2) - (pathWidth / 2);
-
-    ctx.fillStyle = pathColor;
-    ctx.fillRect(pathX, 0, pathWidth, canvas.height);
-
     // Dibujar los segmentos de terreno
     let currentY = canvas.height; // Empezar a dibujar desde la parte inferior
     let segmentOffset = cameraY % (terrainSegments.reduce((sum, seg) => sum + seg.length, 0));
@@ -224,24 +194,6 @@ function gameLoop() {
             ctx.fillRect(0, drawY, canvas.width, segmentHeight);
         }
         currentY -= segment.length;
-    }
-
-    // Dibujar huellas
-    const now = Date.now();
-    for (let i = footprints.length - 1; i >= 0; i--) {
-        const footprint = footprints[i];
-        const elapsedTime = now - footprint.creationTime;
-        const alpha = 1 - (elapsedTime / FOOTPRINT_LIFESPAN);
-
-        if (alpha > 0) {
-            ctx.save();
-            ctx.globalAlpha = alpha;
-            const img = (footprint.type === 'left') ? footprintLeftImg : footprintRightImg;
-            ctx.drawImage(img, footprint.x, footprint.y - (cameraY % canvas.height), footprint.width, footprint.height); // Ajustar Y con cameraY
-            ctx.restore();
-        } else {
-            footprints.splice(i, 1); // Eliminar huellas que ya no son visibles
-        }
     }
 
     requestAnimationFrame(gameLoop);
