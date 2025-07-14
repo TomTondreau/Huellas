@@ -126,6 +126,7 @@ function takeStep(fingerId) {
     let vibrationPattern = [50];
 
     terrainDisplay.textContent = `Terreno: ${currentTerrainName.charAt(0).toUpperCase() + currentTerrainName.slice(1)}`;
+    console.log(`takeStep: cameraY = ${cameraY}, currentTerrainName = ${currentTerrainName}`);
 
     switch (currentTerrainName) {
         case 'lodo':
@@ -192,6 +193,7 @@ function gameLoop() {
         // Asegurarse de que el segmento esté visible en la pantalla
         if (drawY < canvas.height && drawY + segmentHeight > 0) {
             ctx.fillRect(0, drawY, canvas.width, segmentHeight);
+            console.log(`gameLoop: Drawing ${segment.name}, cameraY = ${cameraY}`);
         }
         currentY -= segment.length;
     }
