@@ -46,6 +46,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Gesto de Pan (deslizamiento) de dos dedos
         region.bind(canvas, 'pan', function(e) {
+    e.preventDefault(); // Prevenir el comportamiento por defecto del navegador
+    e.stopPropagation(); // Detener la propagación del evento
     console.log("ZingTouch Pan event detected!"); // Nuevo mensaje de depuración
     // Debug visual: Canvas rojo si se detecta Pan
     currentDebugColor = 'red';
