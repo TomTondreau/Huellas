@@ -120,20 +120,20 @@ function takeStep() {
 
     switch (currentTerrainName) {
         case 'lodo':
-            stepSpeedMultiplier = 0.5; // Slower on mud
+            stepSpeedMultiplier = 0.3; // Much slower on mud
             vibrationPattern = [100];
             break;
         case 'hielo':
-            stepSpeedMultiplier = 1.5; // Faster on ice
+            stepSpeedMultiplier = 1.2; // Still faster, but less than before
             vibrationPattern = [20];
             break;
         case 'adoquin':
-            stepSpeedMultiplier = 0.8; // Slightly slower on cobblestone
+            stepSpeedMultiplier = 0.5; // Slower on cobblestone
             vibrationPattern = [30, 20, 30];
             break;
         case 'tierra':
         default:
-            stepSpeedMultiplier = 1.0; // Normal speed on dirt
+            stepSpeedMultiplier = 0.7; // Slower on dirt
             break;
     }
 
