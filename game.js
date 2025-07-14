@@ -68,6 +68,21 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log("ZingTouch Tap event detected!");
             currentDebugColor = 'purple'; // Debug visual: Canvas morado si se detecta Tap
         });
+
+        // Depuración de eventos táctiles nativos
+        canvas.addEventListener('touchstart', function(e) {
+            if (e.touches.length === 2) {
+                console.log("Native touchstart with 2 fingers detected!");
+                currentDebugColor = 'blue'; // Dos dedos tocando
+            }
+        });
+
+        canvas.addEventListener('touchmove', function(e) {
+            if (e.touches.length === 2) {
+                console.log("Native touchmove with 2 fingers detected!");
+                currentDebugColor = 'purple'; // Dos dedos moviéndose
+            }
+        });
     } else {
         console.error("ZingTouch is NOT defined. Touch events will not work.");
         // Debug visual: Canvas negro si ZingTouch NO está definido
