@@ -6,9 +6,6 @@ const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 const ctx = canvas.getContext('2d');
 
-// Debug visual: Canvas azul al cargar game.js y canvas listo
-currentDebugColor = 'blue';
-
 // Ajustar el tamaño del canvas a la ventana
 function resizeCanvas() {
     canvas.width = window.innerWidth;
@@ -40,8 +37,6 @@ const terrainSegments = [
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof ZingTouch !== 'undefined') {
         console.log("ZingTouch is defined. Initializing region.");
-        // Debug visual: Canvas verde si ZingTouch está definido
-        currentDebugColor = 'green';
         const region = new ZingTouch.Region(canvas); // Inicializar ZingTouch en el canvas
 
         
@@ -49,7 +44,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // Gesto de Tap (toque simple)
         region.bind(canvas, 'tap', function(e) {
             console.log("ZingTouch Tap event detected!");
-            currentDebugColor = 'purple'; // Debug visual: Canvas morado si se detecta Tap
         });
 
         // Depuración de eventos táctiles nativos
@@ -60,7 +54,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (e.touches.length === 2) {
                 e.preventDefault(); // Prevenir el comportamiento por defecto del navegador
                 console.log("Native touchstart with 2 fingers detected!");
-                currentDebugColor = 'blue'; // Dos dedos tocando
                 initialTouch1 = { x: e.touches[0].clientX, y: e.touches[0].clientY, id: e.touches[0].identifier };
                 initialTouch2 = { x: e.touches[1].clientX, y: e.touches[1].clientY, id: e.touches[1].identifier };
             }
@@ -84,12 +77,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (Math.abs(deltaY1) > moveThreshold && Math.abs(deltaY2) > moveThreshold &&
                     Math.sign(deltaY1) === Math.sign(deltaY2)) { // Ambos se mueven en la misma dirección Y
                     console.log("Native pan event detected!");
-                    currentDebugColor = 'red'; // Simular detección de Pan
                     // Aquí puedes llamar a takeStep o tu lógica de movimiento
                     // Por ahora, solo cambiamos el color para depuración
                     takeStep(currentTouch1.id); // Usamos el ID del primer dedo como referencia para takeStep
                 } else {
-                    currentDebugColor = 'purple'; // Dos dedos moviéndose, pero no un "pan" aún
+                    // Dos dedos moviéndose, pero no un "pan" aún
                 }
             }
         });
@@ -103,8 +95,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     } else {
         console.error("ZingTouch is NOT defined. Touch events will not work.");
-        // Debug visual: Canvas negro si ZingTouch NO está definido
-        currentDebugColor = 'black';
     }
 });
 
@@ -154,14 +144,6 @@ function takeStep(fingerId) {
 
 function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height); // Limpiar el canvas
-
-    // Si hay un color de depuración, dibujarlo y salir
-    if (currentDebugColor) {
-        ctx.fillStyle = currentDebugColor;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        requestAnimationFrame(gameLoop);
-        return; // Salir del bucle para no dibujar el juego normal
-    }
 
     // Dibujar el cielo (degradado)
     const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
