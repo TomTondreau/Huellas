@@ -136,6 +136,7 @@ function takeStep(fingerId) {
     lastStepFingerId = fingerId;
 
     if (navigator.vibrate) {
+        console.log("Attempting to vibrate with pattern:", vibrationPattern);
         navigator.vibrate(vibrationPattern);
     }
 }
