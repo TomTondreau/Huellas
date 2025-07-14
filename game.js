@@ -166,9 +166,9 @@ function gameLoop() {
     speedDisplay.textContent = `Velocidad: ${speedMps.toFixed(2)} m/s`;
     lastCameraY = cameraY;
 
-    // Mostrar la distancia en kilómetros
-    const distanceKm = cameraY / PIXELS_PER_METER / 1000; // Convertir píxeles a kilómetros
-    distanceDisplay.textContent = `Distancia: ${distanceKm.toFixed(3)} km`;
+    // Mostrar la distancia en metros
+    const distanceMeters = cameraY / PIXELS_PER_METER; // Convertir píxeles a metros
+    distanceDisplay.textContent = `Distancia: ${distanceMeters.toFixed(2)} m`;
 
     // Dibujar el cielo (degradado)
     const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
