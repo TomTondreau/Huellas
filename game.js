@@ -159,10 +159,14 @@ function takeStep(fingerId) {
     cameraY += stepSpeed; // Mover la cámara
 
     // Añadir una huella al array
-    const footprintX = Math.random() * (canvas.width - 50); // Posición X aleatoria
-    const footprintY = canvas.height - 50; // Posición Y en la parte inferior del canvas
+    const footprintWidth = 50;
+    const footprintHeight = 100;
+    const centerX = canvas.width / 2;
+    const offset = 20; // Distancia desde el centro para cada huella
+    const footprintX = isLeftFootNext ? centerX - offset - footprintWidth / 2 : centerX + offset - footprintWidth / 2;
+    const footprintY = canvas.height - footprintHeight; // Posición Y en la parte inferior del canvas
     const footprintType = isLeftFootNext ? 'left' : 'right'; // Alternar huellas
-    footprints.push({ x: footprintX, y: footprintY, type: footprintType, creationTime: Date.now() });
+    footprints.push({ x: footprintX, y: footprintY, type: footprintType, creationTime: Date.now(), width: footprintWidth, height: footprintHeight });
     isLeftFootNext = !isLeftFootNext; // Alternar para el siguiente paso
 
     lastStepFingerId = fingerId;
@@ -195,6 +199,14 @@ function gameLoop() {
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    // Dibujar el sendero
+    const pathWidth = 100; // Ancho del sendero
+    const pathColor = 'rgba(255, 255, 255, 0.3)'; // Color del sendero (blanco semitransparente)
+    const pathX = (canvas.width / 2) - (pathWidth / 2);
+
+    ctx.fillStyle = pathColor;
+    ctx.fillRect(pathX, 0, pathWidth, canvas.height);
+
     // Dibujar los segmentos de terreno
     let currentY = canvas.height; // Empezar a dibujar desde la parte inferior
     let segmentOffset = cameraY % (terrainSegments.reduce((sum, seg) => sum + seg.length, 0));
@@ -225,7 +237,7 @@ function gameLoop() {
             ctx.save();
             ctx.globalAlpha = alpha;
             const img = (footprint.type === 'left') ? footprintLeftImg : footprintRightImg;
-            ctx.drawImage(img, footprint.x, footprint.y - (cameraY % canvas.height), 50, 50); // Ajustar Y con cameraY
+            ctx.drawImage(img, footprint.x, footprint.y - (cameraY % canvas.height), footprint.width, footprint.height); // Ajustar Y con cameraY
             ctx.restore();
         } else {
             footprints.splice(i, 1); // Eliminar huellas que ya no son visibles

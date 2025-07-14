@@ -1,3 +1,3 @@
-<svg width="50" height="50" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="25" cy="25" r="20" fill="#CCCCCC" />
+<svg width="50" height="100" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="25" cy="50" rx="15" ry="40" fill="#CCCCCC" transform="rotate(10 25 50)" />
 </svg>
