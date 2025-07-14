@@ -42,10 +42,10 @@ let stepsCount = 0; // Contador de pasos
 
 // Definición de los segmentos de terreno (color y longitud)
 const terrainSegments = [
-    { name: 'tierra', color: '#966939', length: 800 },
-    { name: 'lodo', color: '#5C4033', length: 800 },
-    { name: 'hielo', color: '#FFFFFF', length: 800 },
-    { name: 'adoquin', color: '#505050', length: 800 }
+    { name: 'tierra', color: '#966939', length: 1600 },
+    { name: 'lodo', color: '#5C4033', length: 1600 },
+    { name: 'hielo', color: '#FFFFFF', length: 1600 },
+    { name: 'adoquin', color: '#505050', length: 1600 }
 ];
 
 
@@ -120,20 +120,20 @@ function takeStep() {
 
     switch (currentTerrainName) {
         case 'lodo':
-            stepSpeedMultiplier = 0.3; // Much slower on mud
+            stepSpeedMultiplier = 0.1; // Very difficult on mud
             vibrationPattern = [100];
             break;
         case 'hielo':
-            stepSpeedMultiplier = 1.2; // Still faster, but less than before
+            stepSpeedMultiplier = 0.7; // More difficult on ice
             vibrationPattern = [20];
             break;
         case 'adoquin':
-            stepSpeedMultiplier = 0.5; // Slower on cobblestone
+            stepSpeedMultiplier = 0.3; // More difficult on cobblestone
             vibrationPattern = [30, 20, 30];
             break;
         case 'tierra':
         default:
-            stepSpeedMultiplier = 0.7; // Slower on dirt
+            stepSpeedMultiplier = 0.5; // More difficult on dirt
             break;
     }
 
