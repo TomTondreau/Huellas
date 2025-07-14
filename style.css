@@ -22,7 +22,9 @@ canvas {
 #distanceDisplay,
 #speedDisplay,
 #terrainDisplay,
-#instructionsDisplay {
+#instructionsDisplay,
+#timeDisplay,
+#stepsDisplay {
     margin-bottom: 5px;
     padding: 5px;
     background-color: rgba(0, 0, 0, 0.5); /* Fondo semitransparente */

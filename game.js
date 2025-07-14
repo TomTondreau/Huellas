@@ -11,6 +11,8 @@ const distanceDisplay = document.getElementById('distanceDisplay');
 const speedDisplay = document.getElementById('speedDisplay');
 const terrainDisplay = document.getElementById('terrainDisplay');
 const instructionsDisplay = document.getElementById('instructionsDisplay');
+const timeDisplay = document.getElementById('timeDisplay');
+const stepsDisplay = document.getElementById('stepsDisplay');
 
 // Ajustar el tamaño del canvas a la ventana
 function resizeCanvas() {
@@ -35,6 +37,9 @@ const touchStartPositions = {};
 let cameraY = 0; // Usaremos Y para simular el avance en el camino
 let lastCameraY = 0; // Para calcular la velocidad
 let currentSpeed = 0; // Velocidad actual
+
+let startTime = Date.now(); // Tiempo de inicio del juego
+let stepsCount = 0; // Contador de pasos
 
 // Definición de los segmentos de terreno (color y longitud)
 const terrainSegments = [
@@ -148,6 +153,9 @@ function takeStep(fingerId) {
 
     cameraY += stepSpeed; // Mover la cámara
 
+    stepsCount++; // Incrementar el contador de pasos
+    stepsDisplay.textContent = `Pasos: ${stepsCount}`;
+
     lastStepFingerId = fingerId;
 
     if (navigator.vibrate) {
@@ -170,6 +178,12 @@ function gameLoop() {
     // Mostrar la distancia en metros
     const distanceMeters = cameraY / PIXELS_PER_METER; // Convertir píxeles a metros
     distanceDisplay.textContent = `Distancia: ${distanceMeters.toFixed(2)} m`;
+
+    // Mostrar el tiempo transcurrido
+    const elapsedTime = Date.now() - startTime;
+    const minutes = Math.floor(elapsedTime / 60000);
+    const seconds = Math.floor((elapsedTime % 60000) / 1000);
+    timeDisplay.textContent = `Tiempo: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
     // Dibujar el cielo (degradado)
     const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
