@@ -21,8 +21,12 @@ window.addEventListener('resize', resizeCanvas);
 resizeCanvas(); // Llamar al inicio para establecer el tamaño inicial
 
 // --- Variables del Juego ---
-const moveSpeed = 5; // Velocidad de avance por paso en píxeles
+const moveSpeed = 2.33; // Velocidad de avance por paso en píxeles (ajustada para simular 1.4 m/s a 60 FPS)
 const stepDistance = 50; // Distancia en píxeles para un paso
+
+// Constantes de conversión
+const PIXELS_PER_METER = 100; // 100 píxeles = 1 metro
+const FPS = 60; // Asumiendo 60 fotogramas por segundo
 
 let lastStepFingerId = -1;
 const touchStartPositions = {};
@@ -156,12 +160,17 @@ function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height); // Limpiar el canvas
 
     // Calcular y mostrar la velocidad
-    currentSpeed = cameraY - lastCameraY; // Distancia recorrida en este frame
-    speedDisplay.textContent = `Velocidad: ${currentSpeed.toFixed(2)} px/frame`;
+    const distanceCoveredPx = cameraY - lastCameraY; // Distancia recorrida en este frame en píxeles
+    const distanceCoveredMeters = distanceCoveredPx / PIXELS_PER_METER; // Distancia en metros
+    const speedMps = distanceCoveredMeters * FPS; // Velocidad en metros por segundo
+    const speedKph = speedMps * 3.6; // Velocidad en kilómetros por hora (1 m/s = 3.6 km/h)
+
+    speedDisplay.textContent = `Velocidad: ${speedKph.toFixed(2)} km/h`;
     lastCameraY = cameraY;
 
-    // Mostrar la distancia
-    distanceDisplay.textContent = `Distancia: ${cameraY.toFixed(0)} px`;
+    // Mostrar la distancia en kilómetros
+    const distanceKm = cameraY / PIXELS_PER_METER / 1000; // Convertir píxeles a kilómetros
+    distanceDisplay.textContent = `Distancia: ${distanceKm.toFixed(3)} km`;
 
     // Dibujar el cielo (degradado)
     const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
