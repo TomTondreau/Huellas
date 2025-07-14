@@ -44,24 +44,7 @@ document.addEventListener('DOMContentLoaded', function() {
         currentDebugColor = 'green';
         const region = new ZingTouch.Region(canvas); // Inicializar ZingTouch en el canvas
 
-        // Gesto de Pan (deslizamiento) de dos dedos
-        region.bind(canvas, 'pan', function(e) {
-    e.preventDefault(); // Prevenir el comportamiento por defecto del navegador
-    e.stopPropagation(); // Detener la propagación del evento
-    console.log("ZingTouch Pan event detected!"); // Nuevo mensaje de depuración
-    // Debug visual: Canvas rojo si se detecta Pan
-    currentDebugColor = 'red';
-    // Asegurarse de que sean dos toques
-    if (e.detail.touches.length === 2) {
-        const touch1 = e.detail.touches[0];
-        const touch2 = e.detail.touches[1];
-
-        // Lógica para detectar el paso alternado
-        // Esto es una simplificación inicial, la lógica real será más compleja
-        // Por ahora, cualquier deslizamiento de dos dedos activará un paso
-        takeStep(touch1.identifier); // Usamos el ID del primer dedo como referencia
-    }
-});
+        
 
         // Gesto de Tap (toque simple)
         region.bind(canvas, 'tap', function(e) {
@@ -70,18 +53,53 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         // Depuración de eventos táctiles nativos
+        let initialTouch1 = null;
+        let initialTouch2 = null;
+
         canvas.addEventListener('touchstart', function(e) {
             if (e.touches.length === 2) {
+                e.preventDefault(); // Prevenir el comportamiento por defecto del navegador
                 console.log("Native touchstart with 2 fingers detected!");
                 currentDebugColor = 'blue'; // Dos dedos tocando
+                initialTouch1 = { x: e.touches[0].clientX, y: e.touches[0].clientY, id: e.touches[0].identifier };
+                initialTouch2 = { x: e.touches[1].clientX, y: e.touches[1].clientY, id: e.touches[1].identifier };
             }
         });
 
         canvas.addEventListener('touchmove', function(e) {
-            if (e.touches.length === 2) {
-                console.log("Native touchmove with 2 fingers detected!");
-                currentDebugColor = 'purple'; // Dos dedos moviéndose
+            if (e.touches.length === 2 && initialTouch1 && initialTouch2) {
+                e.preventDefault(); // Prevenir el comportamiento por defecto del navegador
+                const currentTouch1 = { x: e.touches[0].clientX, y: e.touches[0].clientY, id: e.touches[0].identifier };
+                const currentTouch2 = { x: e.touches[1].clientX, y: e.touches[1].clientY, id: e.touches[1].identifier };
+
+                // Calcular el desplazamiento de cada dedo
+                const deltaX1 = currentTouch1.x - initialTouch1.x;
+                const deltaY1 = currentTouch1.y - initialTouch1.y;
+                const deltaX2 = currentTouch2.x - initialTouch2.x;
+                const deltaY2 = currentTouch2.y - initialTouch2.y;
+
+                // Considerar un "pan" si ambos dedos se han movido significativamente en la misma dirección general
+                // Puedes ajustar este umbral de movimiento (por ejemplo, 10 píxeles)
+                const moveThreshold = 10;
+                if (Math.abs(deltaY1) > moveThreshold && Math.abs(deltaY2) > moveThreshold &&
+                    Math.sign(deltaY1) === Math.sign(deltaY2)) { // Ambos se mueven en la misma dirección Y
+                    console.log("Native pan event detected!");
+                    currentDebugColor = 'red'; // Simular detección de Pan
+                    // Aquí puedes llamar a takeStep o tu lógica de movimiento
+                    // Por ahora, solo cambiamos el color para depuración
+                    takeStep(currentTouch1.id); // Usamos el ID del primer dedo como referencia para takeStep
+                } else {
+                    currentDebugColor = 'purple'; // Dos dedos moviéndose, pero no un "pan" aún
+                }
             }
+        });
+
+        canvas.addEventListener('touchend', function(e) {
+            // Resetear las posiciones iniciales cuando los dedos se levantan
+            initialTouch1 = null;
+            initialTouch2 = null;
+            // Opcional: resetear el color de depuración o volver al estado normal del juego
+            // currentDebugColor = 'green'; // O el color inicial de ZingTouch
         });
     } else {
         console.error("ZingTouch is NOT defined. Touch events will not work.");
