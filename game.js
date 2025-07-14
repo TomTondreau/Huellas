@@ -1,4 +1,3 @@
-let currentDebugColor = null;
 console.log("game.js loaded");
 
 // --- Configuración del Canvas 2D ---
@@ -8,7 +7,6 @@ const ctx = canvas.getContext('2d');
 
 // Referencias a los elementos de la UI
 const distanceDisplay = document.getElementById('distanceDisplay');
-const speedDisplay = document.getElementById('speedDisplay');
 const terrainDisplay = document.getElementById('terrainDisplay');
 const instructionsDisplay = document.getElementById('instructionsDisplay');
 const timeDisplay = document.getElementById('timeDisplay');
@@ -29,6 +27,8 @@ const stepDistance = 50; // Distancia en píxeles para un paso
 // Constantes de conversión
 const PIXELS_PER_METER = 100; // 100 píxeles = 1 metro
 const FPS = 60; // Asumiendo 60 fotogramas por segundo
+const STEP_LENGTH_METERS = 0.7; // Longitud de un paso humano en metros
+const STEP_LENGTH_PIXELS = STEP_LENGTH_METERS * PIXELS_PER_METER; // Longitud de un paso en píxeles
 
 let lastStepFingerId = -1;
 const touchStartPositions = {};
@@ -36,7 +36,6 @@ const touchStartPositions = {};
 // Posición actual de la cámara (simulada en 2D)
 let cameraY = 0; // Usaremos Y para simular el avance en el camino
 let lastCameraY = 0; // Para calcular la velocidad
-let currentSpeed = 0; // Velocidad actual
 
 let startTime = Date.now(); // Tiempo de inicio del juego
 let stepsCount = 0; // Contador de pasos
@@ -60,17 +59,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Gesto de Tap (toque simple)
         region.bind(canvas, 'tap', function(e) {
-            console.log("ZingTouch Tap event detected!");
         });
 
         // Depuración de eventos táctiles nativos
         let initialTouch1 = null;
         let initialTouch2 = null;
+        let accumulatedMovementY = 0; // Acumulador para contar pasos
 
         canvas.addEventListener('touchstart', function(e) {
             if (e.touches.length === 2) {
                 e.preventDefault(); // Prevenir el comportamiento por defecto del navegador
-                console.log("Native touchstart with 2 fingers detected!");
                 initialTouch1 = { x: e.touches[0].clientX, y: e.touches[0].clientY, id: e.touches[0].identifier };
                 initialTouch2 = { x: e.touches[1].clientX, y: e.touches[1].clientY, id: e.touches[1].identifier };
             }
@@ -83,22 +81,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 const currentTouch2 = { x: e.touches[1].clientX, y: e.touches[1].clientY, id: e.touches[1].identifier };
 
                 // Calcular el desplazamiento de cada dedo
-                const deltaX1 = currentTouch1.x - initialTouch1.x;
                 const deltaY1 = currentTouch1.y - initialTouch1.y;
-                const deltaX2 = currentTouch2.x - initialTouch2.x;
                 const deltaY2 = currentTouch2.y - initialTouch2.y;
 
-                // Considerar un "pan" si ambos dedos se han movido significativamente en la misma dirección general
-                // Puedes ajustar este umbral de movimiento (por ejemplo, 10 píxeles)
-                const moveThreshold = 10;
-                if (Math.abs(deltaY1) > moveThreshold && Math.abs(deltaY2) > moveThreshold &&
-                    Math.sign(deltaY1) === Math.sign(deltaY2)) { // Ambos se mueven en la misma dirección Y
-                    console.log("Native pan event detected!");
-                    // Aquí puedes llamar a takeStep o tu lógica de movimiento
-                    // Por ahora, solo cambiamos el color para depuración
-                    takeStep(currentTouch1.id); // Usamos el ID del primer dedo como referencia para takeStep
-                } else {
-                    // Dos dedos moviéndose, pero no un "pan" aún
+                // Mover la cámara basándose en el promedio del movimiento vertical de los dedos
+                const averageDeltaY = (deltaY1 + deltaY2) / 2;
+                cameraY -= averageDeltaY; // Restar porque el movimiento hacia abajo de los dedos significa avanzar en el juego
+
+                // Actualizar las posiciones iniciales para el siguiente frame
+                initialTouch1 = currentTouch1;
+                initialTouch2 = currentTouch2;
+
+                // Actualizar el terreno y la vibración
+                takeStep();
+
+                // Contar pasos
+                accumulatedMovementY += Math.abs(averageDeltaY); // Acumular el valor absoluto del movimiento
+                if (accumulatedMovementY >= STEP_LENGTH_PIXELS) {
+                    stepsCount++;
+                    stepsDisplay.textContent = `Pasos: ${stepsCount}`;
+                    accumulatedMovementY = 0; // Resetear el acumulador
                 }
             }
         });
@@ -116,34 +118,19 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function takeStep(fingerId) {
-    let currentTerrainName = 'tierra'; // Por defecto
-    // Determinar el terreno actual basado en cameraY
-    let totalLength = 0;
-    for(let i = 0; i < terrainSegments.length; i++) {
-        totalLength += terrainSegments[i].length;
-        if (cameraY % totalLength < totalLength - terrainSegments[i].length) {
-            currentTerrainName = terrainSegments[i].name;
-            break;
-        }
-    }
-
-    let stepSpeed = moveSpeed;
+    let currentTerrainName = getCurrentTerrainName(cameraY);
     let vibrationPattern = [50];
 
     terrainDisplay.textContent = `Terreno: ${currentTerrainName.charAt(0).toUpperCase() + currentTerrainName.slice(1)}`;
-    console.log(`takeStep: cameraY = ${cameraY}, currentTerrainName = ${currentTerrainName}`);
 
     switch (currentTerrainName) {
         case 'lodo':
-            stepSpeed *= 0.7;
             vibrationPattern = [100];
             break;
         case 'hielo':
-            stepSpeed *= 1.5;
             vibrationPattern = [20];
             break;
         case 'adoquin':
-            stepSpeed *= 1.0;
             vibrationPattern = [30, 20, 30];
             break;
         case 'tierra':
@@ -151,29 +138,28 @@ function takeStep(fingerId) {
             break;
     }
 
-    cameraY += stepSpeed; // Mover la cámara
-
-    stepsCount++; // Incrementar el contador de pasos
-    stepsDisplay.textContent = `Pasos: ${stepsCount}`;
-
-    lastStepFingerId = fingerId;
-
     if (navigator.vibrate) {
         navigator.vibrate(vibrationPattern);
     }
+}
+
+function getCurrentTerrainName(yPosition) {
+    let currentTerrainName = 'tierra'; // Por defecto
+    let totalLength = 0;
+    for(let i = 0; i < terrainSegments.length; i++) {
+        totalLength += terrainSegments[i].length;
+        if (yPosition % totalLength < totalLength - terrainSegments[i].length) {
+            currentTerrainName = terrainSegments[i].name;
+            break;
+        }
+    }
+    return currentTerrainName;
 }
 
 // --- Bucle de Dibujo y Actualización ---
 
 function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height); // Limpiar el canvas
-
-    // Calcular y mostrar la velocidad
-    const distanceCoveredPx = cameraY - lastCameraY; // Distancia recorrida en este frame en píxeles
-    const distanceCoveredMeters = distanceCoveredPx / PIXELS_PER_METER; // Distancia en metros
-    const speedMps = distanceCoveredMeters * FPS; // Velocidad en metros por segundo
-    speedDisplay.textContent = `Velocidad: ${speedMps.toFixed(2)} m/s`;
-    lastCameraY = cameraY;
 
     // Mostrar la distancia en metros
     const distanceMeters = cameraY / PIXELS_PER_METER; // Convertir píxeles a metros
@@ -207,7 +193,6 @@ function gameLoop() {
         // Asegurarse de que el segmento esté visible en la pantalla
         if (drawY < canvas.height && drawY + segmentHeight > 0) {
             ctx.fillRect(0, drawY, canvas.width, segmentHeight);
-            console.log(`gameLoop: Drawing ${segment.name}, cameraY = ${cameraY}`);
         }
         currentY -= segment.length;
     }
