@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 accumulatedMovementY += Math.abs(averageDeltaY); // Acumular el valor absoluto del movimiento
                 if (accumulatedMovementY >= STEP_LENGTH_PIXELS) {
                     stepsCount++;
-                    stepsDisplay.textContent = `Pasos: ${stepsCount}`;
+                    stepsDisplay.textContent = `🚶 Pasos: ${stepsCount}`;
                     accumulatedMovementY = 0; // Resetear el acumulador
                 }
             }
@@ -117,11 +117,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-function takeStep(fingerId) {
+function takeStep() {
     let currentTerrainName = getCurrentTerrainName(cameraY);
     let vibrationPattern = [50];
-
-    terrainDisplay.textContent = `Terreno: ${currentTerrainName.charAt(0).toUpperCase() + currentTerrainName.slice(1)}`;
 
     switch (currentTerrainName) {
         case 'lodo':
@@ -167,13 +165,17 @@ function gameLoop() {
 
     // Mostrar la distancia en metros
     const distanceMeters = cameraY / PIXELS_PER_METER; // Convertir píxeles a metros
-    distanceDisplay.textContent = `Distancia: ${distanceMeters.toFixed(2)} m`;
+    distanceDisplay.textContent = `👣 Distancia: ${distanceMeters.toFixed(2)} m`;
+
+    // Actualizar el terreno
+    const currentTerrainName = getCurrentTerrainName(cameraY);
+    terrainDisplay.textContent = `🏞️ Terreno: ${currentTerrainName.charAt(0).toUpperCase() + currentTerrainName.slice(1)}`;
 
     // Mostrar el tiempo transcurrido
     const elapsedTime = Date.now() - startTime;
     const minutes = Math.floor(elapsedTime / 60000);
     const seconds = Math.floor((elapsedTime % 60000) / 1000);
-    timeDisplay.textContent = `Tiempo: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    timeDisplay.textContent = `⏱️ Tiempo: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
     // Dibujar el cielo (degradado)
     const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
