@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Por ahora, cualquier deslizamiento de dos dedos activará un paso
         takeStep(touch1.identifier); // Usamos el ID del primer dedo como referencia
     }
-}, { numInputs: 2 }); // Solo detectar con 2 dedos
+});
 
         // Gesto de Tap (toque simple)
         region.bind(canvas, 'tap', function(e) {
