@@ -1,4 +1,3 @@
-
 html, body {
     height: 100%;
     margin: 0;
@@ -8,4 +7,24 @@ html, body {
 
 canvas {
     display: block; /* Asegura que el canvas no tenga espacio extra */
+}
+
+#ui-container {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    color: white;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    z-index: 10; /* Asegura que esté por encima del canvas */
+}
+
+#distanceDisplay,
+#speedDisplay,
+#terrainDisplay,
+#instructionsDisplay {
+    margin-bottom: 5px;
+    padding: 5px;
+    background-color: rgba(0, 0, 0, 0.5); /* Fondo semitransparente */
+    border-radius: 3px;
 }

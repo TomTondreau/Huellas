@@ -6,6 +6,12 @@ const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 const ctx = canvas.getContext('2d');
 
+// Referencias a los elementos de la UI
+const distanceDisplay = document.getElementById('distanceDisplay');
+const speedDisplay = document.getElementById('speedDisplay');
+const terrainDisplay = document.getElementById('terrainDisplay');
+const instructionsDisplay = document.getElementById('instructionsDisplay');
+
 // Ajustar el tamaño del canvas a la ventana
 function resizeCanvas() {
     canvas.width = window.innerWidth;
@@ -23,6 +29,8 @@ const touchStartPositions = {};
 
 // Posición actual de la cámara (simulada en 2D)
 let cameraY = 0; // Usaremos Y para simular el avance en el camino
+let lastCameraY = 0; // Para calcular la velocidad
+let currentSpeed = 0; // Velocidad actual
 
 // Definición de los segmentos de terreno (color y longitud)
 const terrainSegments = [
@@ -113,6 +121,8 @@ function takeStep(fingerId) {
     let stepSpeed = moveSpeed;
     let vibrationPattern = [50];
 
+    terrainDisplay.textContent = `Terreno: ${currentTerrainName.charAt(0).toUpperCase() + currentTerrainName.slice(1)}`;
+
     switch (currentTerrainName) {
         case 'lodo':
             stepSpeed *= 0.7;
@@ -144,6 +154,14 @@ function takeStep(fingerId) {
 
 function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height); // Limpiar el canvas
+
+    // Calcular y mostrar la velocidad
+    currentSpeed = cameraY - lastCameraY; // Distancia recorrida en este frame
+    speedDisplay.textContent = `Velocidad: ${currentSpeed.toFixed(2)} px/frame`;
+    lastCameraY = cameraY;
+
+    // Mostrar la distancia
+    distanceDisplay.textContent = `Distancia: ${cameraY.toFixed(0)} px`;
 
     // Dibujar el cielo (degradado)
     const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
