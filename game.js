@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Mover la cámara basándose en el promedio del movimiento vertical de los dedos
                 const averageDeltaY = (deltaY1 + deltaY2) / 2;
-                cameraY -= averageDeltaY; // Restar porque el movimiento hacia abajo de los dedos significa avanzar en el juego
+                cameraY += averageDeltaY; // Sumar porque el movimiento hacia abajo de los dedos significa avanzar en el juego
 
                 // Actualizar las posiciones iniciales para el siguiente frame
                 initialTouch1 = currentTouch1;
@@ -144,12 +144,16 @@ function takeStep(fingerId) {
 }
 
 function getCurrentTerrainName(yPosition) {
-    let currentTerrainName = 'tierra'; // Por defecto
-    let totalLength = 0;
+    let currentTerrainName = 'tierra'; // Default
+    let accumulatedLength = 0;
+    const totalTerrainLength = terrainSegments.reduce((sum, seg) => sum + seg.length, 0);
+    const effectiveY = yPosition % totalTerrainLength;
+
     for(let i = 0; i < terrainSegments.length; i++) {
-        totalLength += terrainSegments[i].length;
-        if (yPosition % totalLength < totalLength - terrainSegments[i].length) {
-            currentTerrainName = terrainSegments[i].name;
+        const segment = terrainSegments[i];
+        accumulatedLength += segment.length;
+        if (effectiveY < accumulatedLength) {
+            currentTerrainName = segment.name;
             break;
         }
     }
