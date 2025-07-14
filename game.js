@@ -84,16 +84,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 const deltaY1 = currentTouch1.y - initialTouch1.y;
                 const deltaY2 = currentTouch2.y - initialTouch2.y;
 
+                // Actualizar el terreno y la vibración
+                const stepSpeedMultiplier = takeStep();
+
                 // Mover la cámara basándose en el promedio del movimiento vertical de los dedos
                 const averageDeltaY = (deltaY1 + deltaY2) / 2;
-                cameraY += averageDeltaY; // Sumar porque el movimiento hacia abajo de los dedos significa avanzar en el juego
-
-                // Actualizar las posiciones iniciales para el siguiente frame
-                initialTouch1 = currentTouch1;
-                initialTouch2 = currentTouch2;
-
-                // Actualizar el terreno y la vibración
-                takeStep();
+                cameraY += averageDeltaY * stepSpeedMultiplier; // Sumar porque el movimiento hacia abajo de los dedos significa avanzar en el juego
 
                 // Contar pasos
                 accumulatedMovementY += Math.abs(averageDeltaY); // Acumular el valor absoluto del movimiento
@@ -120,25 +116,31 @@ document.addEventListener('DOMContentLoaded', function() {
 function takeStep() {
     let currentTerrainName = getCurrentTerrainName(cameraY);
     let vibrationPattern = [50];
+    let stepSpeedMultiplier = 1.0; // Default speed multiplier
 
     switch (currentTerrainName) {
         case 'lodo':
+            stepSpeedMultiplier = 0.5; // Slower on mud
             vibrationPattern = [100];
             break;
         case 'hielo':
+            stepSpeedMultiplier = 1.5; // Faster on ice
             vibrationPattern = [20];
             break;
         case 'adoquin':
+            stepSpeedMultiplier = 0.8; // Slightly slower on cobblestone
             vibrationPattern = [30, 20, 30];
             break;
         case 'tierra':
         default:
+            stepSpeedMultiplier = 1.0; // Normal speed on dirt
             break;
     }
 
     if (navigator.vibrate) {
         navigator.vibrate(vibrationPattern);
     }
+    return stepSpeedMultiplier;
 }
 
 function getCurrentTerrainName(yPosition) {
