@@ -73,6 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         canvas.addEventListener('touchmove', function(e) {
             if (e.touches.length === 2 && initialTouch1 && initialTouch2) {
+                console.log("DIAGNÓSTICO: Movimiento de dos dedos detectado."); // <-- LÍNEA DE DIAGNÓSTICO
                 e.preventDefault(); // Prevenir el comportamiento por defecto del navegador
                 const currentTouch1 = { x: e.touches[0].clientX, y: e.touches[0].clientY, id: e.touches[0].identifier };
                 const currentTouch2 = { x: e.touches[1].clientX, y: e.touches[1].clientY, id: e.touches[1].identifier };
