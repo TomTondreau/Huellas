@@ -121,9 +121,10 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function takeStep() {
-    console.log("DIAGNÓSTICO: Entrando en la función takeStep."); // <-- 2DO DETECTOR
     const currentTerrain = getTerrainSegmentAt(cameraY);
     const currentTerrainName = currentTerrain.name;
+    console.log(`DIAGNÓSTICO: cameraY es ${cameraY}, Terreno es ${currentTerrainName}`); // <-- DETECTOR MEJORADO
+    let vibrationPattern = [50];
     let vibrationPattern = [50];
     let stepSpeedMultiplier = 1.0; // Default speed multiplier
 
