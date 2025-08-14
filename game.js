@@ -1,4 +1,4 @@
-console.log("DIAGNÓSTICO: El archivo game.js se cargó correctamente.");
+
 
 // --- Configuración del Canvas 2D ---
 const canvas = document.createElement('canvas');
@@ -44,6 +44,52 @@ document.addEventListener('DOMContentLoaded', function() {
         let initialTouch2 = null;
         let accumulatedMovementY = 0;
 
+        // --- Soporte para Mouse/Trackpad ---
+        let isMouseDown = false;
+        let lastMouseY = 0;
+
+        canvas.addEventListener('mousedown', function(e) {
+            isMouseDown = true;
+            lastMouseY = e.clientY;
+            e.preventDefault();
+        });
+
+        canvas.addEventListener('mousemove', function(e) {
+            if (isMouseDown) {
+                e.preventDefault();
+                const deltaY = e.clientY - lastMouseY;
+                lastMouseY = e.clientY;
+
+                const stepSpeedMultiplier = takeStep();
+                // Simulamos el "averageDeltaY" del modo táctil
+                const averageDeltaY = deltaY;
+                cameraY += averageDeltaY * stepSpeedMultiplier;
+
+                accumulatedMovementY += Math.abs(averageDeltaY);
+                if (accumulatedMovementY >= STEP_LENGTH_PIXELS) {
+                    stepsCount++;
+                    stepsDisplay.textContent = `🚶 Pasos: ${stepsCount}`;
+                    accumulatedMovementY = 0;
+
+                    footprints.push({
+                        x: e.clientX,
+                        y: e.clientY,
+                        opacity: 1.0,
+                        rotation: Math.random() * 0.2 - 0.1
+                    });
+                }
+            }
+        });
+
+        canvas.addEventListener('mouseup', function(e) {
+            isMouseDown = false;
+        });
+
+        canvas.addEventListener('mouseleave', function(e) {
+            isMouseDown = false;
+        });
+
+        // --- Soporte Táctil Original ---
         canvas.addEventListener('touchstart', function(e) {
             if (e.touches.length === 2) {
                 e.preventDefault();
