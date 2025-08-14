@@ -171,57 +171,51 @@ let footprints = []; // Array para almacenar las huellas
 function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height); // Limpiar el canvas
 
-    // Mostrar la distancia en metros
-    const distanceMeters = cameraY / PIXELS_PER_METER; // Convertir píxeles a metros
+    // --- UI Updates ---
+    const distanceMeters = cameraY / PIXELS_PER_METER;
     distanceDisplay.textContent = `👣 Distancia: ${distanceMeters.toFixed(2)} m`;
-
-    // Actualizar el terreno
     const currentTerrain = getTerrainSegmentAt(cameraY);
     terrainDisplay.textContent = `🏞️ Terreno: ${currentTerrain.name.charAt(0).toUpperCase() + currentTerrain.name.slice(1)}`;
-
-    // Mostrar el tiempo transcurrido
     const elapsedTime = Date.now() - startTime;
     const minutes = Math.floor(elapsedTime / 60000);
     const seconds = Math.floor((elapsedTime % 60000) / 1000);
     timeDisplay.textContent = `⏱️ Tiempo: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
-    // Dibujar el cielo (degradado inspirado en Firewatch)
+    // --- Dibujado ---
+
+    // 1. Dibujar el cielo como fondo
     const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
     gradient.addColorStop(0, '#F7931E'); // Naranja cálido superior
     gradient.addColorStop(1, '#FF6B35'); // Naranja cálido inferior
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Dibujar los segmentos de terreno (Lógica corregida)
-    // El jugador está en la parte inferior de la pantalla (y=canvas.height).
-    // Dibujamos el mundo desde la posición de la cámara hacia adelante (hacia y=0).
-    let world_y_start = cameraY;
-    let screen_y_start = canvas.height;
+    // 2. Dibujar los segmentos de terreno visibles
+    const screenTop_worldY = cameraY - canvas.height;
+    const screenBottom_worldY = cameraY;
 
-    while (screen_y_start > 0) {
-        const segment = getTerrainSegmentAt(world_y_start);
-        const totalTerrainLength = terrainSegments.reduce((sum, seg) => sum + seg.length, 0);
-        const world_y_effective = totalTerrainLength > 0 ? world_y_start % totalTerrainLength : 0;
+    let segment_worldY_start = 0;
+    for (const segment of terrainSegments) {
+        const segment_worldY_end = segment_worldY_start + segment.length;
 
-        let segment_start_y = 0;
-        for(const s of terrainSegments) {
-            if (s.name === segment.name) break;
-            segment_start_y += s.length;
+        // Comprobar si hay solapamiento entre el segmento y la pantalla
+        const overlap_start = Math.max(screenTop_worldY, segment_worldY_start);
+        const overlap_end = Math.min(screenBottom_worldY, segment_worldY_end);
+
+        if (overlap_start < overlap_end) {
+            // Calcular la posición y altura en la pantalla
+            const y_screen_start = canvas.height - (overlap_end - screenTop_worldY);
+            const y_screen_end = canvas.height - (overlap_start - screenTop_worldY);
+            const height_on_screen = y_screen_end - y_screen_start;
+
+            ctx.fillStyle = segment.color;
+            ctx.fillRect(0, y_screen_start, canvas.width, height_on_screen);
         }
 
-        const distance_into_segment = world_y_effective - segment_start_y;
-        const remaining_in_segment = segment.length - distance_into_segment;
-
-        const draw_height = Math.min(screen_y_start, remaining_in_segment);
-
-        ctx.fillStyle = segment.color;
-        ctx.fillRect(0, screen_y_start - draw_height, canvas.width, draw_height);
-
-        screen_y_start -= draw_height;
-        world_y_start += draw_height;
+        segment_worldY_start = segment_worldY_end;
     }
 
-    // Dibujar y actualizar huellas
+    // 3. Dibujar y actualizar huellas
     footprints.forEach((footprint, index) => {
         footprint.opacity -= 0.01; // Reducir la opacidad
         if (footprint.opacity <= 0) {
