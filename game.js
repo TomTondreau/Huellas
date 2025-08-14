@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 const stepSpeedMultiplier = takeStep();
                 const averageDeltaY = (deltaY1 + deltaY2) / 2;
-                cameraY += averageDeltaY * stepSpeedMultiplier;
+                cameraY -= averageDeltaY * stepSpeedMultiplier;
 
                 accumulatedMovementY += Math.abs(averageDeltaY);
                 if (accumulatedMovementY >= STEP_LENGTH_PIXELS) {
@@ -221,7 +221,7 @@ function gameLoop() {
     }
 
     // --- UI Updates (se mantienen igual) ---
-    const distanceMeters = cameraY / PIXELS_PER_METER;
+    const distanceMeters = Math.abs(cameraY / PIXELS_PER_METER);
     distanceDisplay.textContent = `👣 Distancia: ${distanceMeters.toFixed(2)} m`;
     const currentTerrain = getTerrainSegmentAt(cameraY);
     terrainDisplay.textContent = `🏞️ Terreno: ${currentTerrain.name.charAt(0).toUpperCase() + currentTerrain.name.slice(1)}`;
