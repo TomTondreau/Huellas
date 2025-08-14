@@ -120,7 +120,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function takeStep() {
-    let currentTerrainName = getCurrentTerrainName(cameraY);
+    const currentTerrain = getTerrainSegmentAt(cameraY);
+    const currentTerrainName = currentTerrain.name;
     let vibrationPattern = [50];
     let stepSpeedMultiplier = 1.0; // Default speed multiplier
 
@@ -169,7 +170,8 @@ function getTerrainSegmentAt(yPosition) {
 let footprints = []; // Array para almacenar las huellas
 
 function gameLoop() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // Limpiar el canvas
+    // Limpiar el canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // --- UI Updates ---
     const distanceMeters = cameraY / PIXELS_PER_METER;
@@ -181,45 +183,32 @@ function gameLoop() {
     const seconds = Math.floor((elapsedTime % 60000) / 1000);
     timeDisplay.textContent = `⏱️ Tiempo: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
-    // --- Dibujado ---
+    // --- Dibujado Definitivo ---
 
     // 1. Dibujar el cielo como fondo
     const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    gradient.addColorStop(0, '#F7931E'); // Naranja cálido superior
-    gradient.addColorStop(1, '#FF6B35'); // Naranja cálido inferior
+    gradient.addColorStop(0, '#F7931E');
+    gradient.addColorStop(1, '#FF6B35');
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // 2. Dibujar los segmentos de terreno visibles
-    const screenTop_worldY = cameraY - canvas.height;
-    const screenBottom_worldY = cameraY;
+    // 2. Dibujar el terreno visible, línea por línea desde el horizonte hacia abajo
+    for (let y = 0; y < canvas.height; y++) {
+        // Mapear el pixel y de la pantalla a una coordenada en el mundo del juego
+        const worldY = cameraY + y - canvas.height;
 
-    let segment_worldY_start = 0;
-    for (const segment of terrainSegments) {
-        const segment_worldY_end = segment_worldY_start + segment.length;
-
-        // Comprobar si hay solapamiento entre el segmento y la pantalla
-        const overlap_start = Math.max(screenTop_worldY, segment_worldY_start);
-        const overlap_end = Math.min(screenBottom_worldY, segment_worldY_end);
-
-        if (overlap_start < overlap_end) {
-            // Calcular la posición y altura en la pantalla
-            const y_screen_start = canvas.height - (overlap_end - screenTop_worldY);
-            const y_screen_end = canvas.height - (overlap_start - screenTop_worldY);
-            const height_on_screen = y_screen_end - y_screen_start;
-
+        if (worldY >= 0) {
+            const segment = getTerrainSegmentAt(worldY);
             ctx.fillStyle = segment.color;
-            ctx.fillRect(0, y_screen_start, canvas.width, height_on_screen);
+            ctx.fillRect(0, y, canvas.width, 1); // Dibuja una línea de 1px de alto
         }
-
-        segment_worldY_start = segment_worldY_end;
     }
 
     // 3. Dibujar y actualizar huellas
     footprints.forEach((footprint, index) => {
-        footprint.opacity -= 0.01; // Reducir la opacidad
+        footprint.opacity -= 0.01;
         if (footprint.opacity <= 0) {
-            footprints.splice(index, 1); // Eliminar la huella si es invisible
+            footprints.splice(index, 1);
         } else {
             drawFootprint(footprint);
         }
