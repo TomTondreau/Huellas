@@ -31,10 +31,10 @@ let stepsCount = 0;
 let footprints = [];
 
 const terrainSegments = [
-    { name: 'tierra', color: '#D2691E', length: 500 },
-    { name: 'lodo', color: '#8B4513', length: 500 },
-    { name: 'hielo', color: '#A4D8F0', length: 500 },
-    { name: 'adoquin', color: '#696969', length: 500 }
+    { name: 'tierra', color: '#D2691E', length: 2000 },
+    { name: 'lodo', color: '#8B4513', length: 2000 },
+    { name: 'hielo', color: '#A4D8F0', length: 2000 },
+    { name: 'adoquin', color: '#696969', length: 2000 }
 ];
 
 // --- Lógica de Control Táctil ---
