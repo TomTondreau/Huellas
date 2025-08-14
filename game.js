@@ -88,12 +88,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 const averageDeltaY = (deltaY1 + deltaY2) / 2;
                 cameraY += averageDeltaY * stepSpeedMultiplier; // Sumar porque el movimiento hacia abajo de los dedos significa avanzar en el juego
 
-                // Contar pasos
+                // Contar pasos y añadir huellas
                 accumulatedMovementY += Math.abs(averageDeltaY); // Acumular el valor absoluto del movimiento
                 if (accumulatedMovementY >= STEP_LENGTH_PIXELS) {
                     stepsCount++;
                     stepsDisplay.textContent = `🚶 Pasos: ${stepsCount}`;
                     accumulatedMovementY = 0; // Resetear el acumulador
+
+                    // Añadir una nueva huella en la posición de uno de los dedos
+                    const touchForFootprint = e.touches[0]; // Usar el primer dedo para la posición
+                    footprints.push({
+                        x: touchForFootprint.clientX,
+                        y: touchForFootprint.clientY,
+                        opacity: 1.0,
+                        rotation: Math.random() * 0.2 - 0.1 // Pequeña rotación aleatoria
+                    });
                 }
             }
         });
@@ -159,6 +168,8 @@ function getCurrentTerrainName(yPosition) {
 
 // --- Bucle de Dibujo y Actualización ---
 
+let footprints = []; // Array para almacenar las huellas
+
 function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height); // Limpiar el canvas
 
@@ -202,7 +213,27 @@ function gameLoop() {
         currentY -= segment.length;
     }
 
+    // Dibujar y actualizar huellas
+    footprints.forEach((footprint, index) => {
+        footprint.opacity -= 0.01; // Reducir la opacidad
+        if (footprint.opacity <= 0) {
+            footprints.splice(index, 1); // Eliminar la huella si es invisible
+        } else {
+            drawFootprint(footprint);
+        }
+    });
+
     requestAnimationFrame(gameLoop);
+}
+
+// Función para dibujar una huella simple
+function drawFootprint(footprint) {
+    ctx.fillStyle = `rgba(0, 0, 0, ${footprint.opacity * 0.2})`; // Color oscuro semitransparente
+    // Dibuja una forma simple de huella (dos óvalos)
+    ctx.beginPath();
+    ctx.ellipse(footprint.x, footprint.y, 10, 20, footprint.rotation, 0, 2 * Math.PI); // Suela
+    ctx.ellipse(footprint.x + Math.sin(footprint.rotation) * 20, footprint.y - Math.cos(footprint.rotation) * 20, 15, 12, footprint.rotation, 0, 2 * Math.PI); // Dedos
+    ctx.fill();
 }
 
 gameLoop();
