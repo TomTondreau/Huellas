@@ -7,6 +7,7 @@ html, body {
 
 canvas {
     display: block; /* Asegura que el canvas no tenga espacio extra */
+    touch-action: none; /* Evita el zoom y otros gestos del navegador */
 }
 
 #ui-container {
