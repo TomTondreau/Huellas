@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 const stepSpeedMultiplier = takeStep();
                 const averageDeltaY = (deltaY1 + deltaY2) / 2;
-                cameraY -= averageDeltaY * stepSpeedMultiplier;
+                cameraY += averageDeltaY * stepSpeedMultiplier;
 
                 accumulatedMovementY += Math.abs(averageDeltaY);
                 if (accumulatedMovementY >= STEP_LENGTH_PIXELS) {
@@ -209,15 +209,21 @@ function gameLoop() {
     ctx.closePath();
     ctx.fill();
 
-    // 3. Dibujar el suelo con perspectiva
-    for (let y = 0; y < canvas.height - horizonY; y++) {
-        const perspectiveFactor = y / (canvas.height - horizonY);
-        const worldZ = 1 / (1 - perspectiveFactor * 0.99); // Evita división por cero
-        const worldY = cameraY + worldZ * 100; // Ajustar el factor de escala
+    // 3. Dibujar el suelo con perspectiva (Lógica corregida)
+    // Iteramos desde el horizonte hacia abajo (y_from_horizon = 0 a canvas.height - horizonY)
+    for (let y_from_horizon = 0; y_from_horizon < canvas.height - horizonY; y_from_horizon++) {
+        // Calcular la distancia en el mundo del juego para esta línea de la pantalla
+        // Las líneas más cercanas al horizonte (y_from_horizon pequeño) representan distancias grandes
+        // Las líneas más cercanas al jugador (y_from_horizon grande) representan distancias pequeñas
+        // Usamos una función inversa para la perspectiva
+        const distance_in_world = (canvas.height - horizonY) / (y_from_horizon + 1) * 50; // +1 para evitar div por cero, 50 es un factor de escala
+        
+        // La posición en el mundo a muestrear es la posición del jugador + la distancia
+        const worldY_to_sample = cameraY + distance_in_world;
 
-        const segment = getTerrainSegmentAt(worldY);
+        const segment = getTerrainSegmentAt(worldY_to_sample);
         ctx.fillStyle = segment.color;
-        ctx.fillRect(0, horizonY + y, canvas.width, 1);
+        ctx.fillRect(0, horizonY + y_from_horizon, canvas.width, 1);
     }
 
     // --- UI Updates (se mantienen igual) ---
