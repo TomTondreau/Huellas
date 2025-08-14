@@ -149,21 +149,19 @@ function takeStep() {
     return stepSpeedMultiplier;
 }
 
-function getCurrentTerrainName(yPosition) {
-    let currentTerrainName = 'tierra'; // Default
+function getTerrainSegmentAt(yPosition) {
     let accumulatedLength = 0;
     const totalTerrainLength = terrainSegments.reduce((sum, seg) => sum + seg.length, 0);
-    const effectiveY = yPosition % totalTerrainLength;
+    // Evitar el módulo de cero si la longitud total es 0
+    const effectiveY = totalTerrainLength > 0 ? yPosition % totalTerrainLength : 0;
 
-    for(let i = 0; i < terrainSegments.length; i++) {
-        const segment = terrainSegments[i];
+    for(const segment of terrainSegments) {
         accumulatedLength += segment.length;
         if (effectiveY < accumulatedLength) {
-            currentTerrainName = segment.name;
-            break;
+            return segment;
         }
     }
-    return currentTerrainName;
+    return terrainSegments[0] || { name: 'default', color: '#000' }; // Default
 }
 
 // --- Bucle de Dibujo y Actualización ---
@@ -178,8 +176,8 @@ function gameLoop() {
     distanceDisplay.textContent = `👣 Distancia: ${distanceMeters.toFixed(2)} m`;
 
     // Actualizar el terreno
-    const currentTerrainName = getCurrentTerrainName(cameraY);
-    terrainDisplay.textContent = `🏞️ Terreno: ${currentTerrainName.charAt(0).toUpperCase() + currentTerrainName.slice(1)}`;
+    const currentTerrain = getTerrainSegmentAt(cameraY);
+    terrainDisplay.textContent = `🏞️ Terreno: ${currentTerrain.name.charAt(0).toUpperCase() + currentTerrain.name.slice(1)}`;
 
     // Mostrar el tiempo transcurrido
     const elapsedTime = Date.now() - startTime;
@@ -194,23 +192,33 @@ function gameLoop() {
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Dibujar los segmentos de terreno
-    let currentY = canvas.height; // Empezar a dibujar desde la parte inferior
-    let segmentOffset = cameraY % (terrainSegments.reduce((sum, seg) => sum + seg.length, 0));
+    // Dibujar los segmentos de terreno (Lógica corregida)
+    // El jugador está en la parte inferior de la pantalla (y=canvas.height).
+    // Dibujamos el mundo desde la posición de la cámara hacia adelante (hacia y=0).
+    let world_y_start = cameraY;
+    let screen_y_start = canvas.height;
 
-    for (let i = 0; i < terrainSegments.length; i++) {
-        const segment = terrainSegments[i];
-        ctx.fillStyle = segment.color;
-        
-        // Calcular la posición y altura del segmento en la pantalla
-        let segmentHeight = segment.length;
-        let drawY = currentY - segmentHeight + segmentOffset;
+    while (screen_y_start > 0) {
+        const segment = getTerrainSegmentAt(world_y_start);
+        const totalTerrainLength = terrainSegments.reduce((sum, seg) => sum + seg.length, 0);
+        const world_y_effective = totalTerrainLength > 0 ? world_y_start % totalTerrainLength : 0;
 
-        // Asegurarse de que el segmento esté visible en la pantalla
-        if (drawY < canvas.height && drawY + segmentHeight > 0) {
-            ctx.fillRect(0, drawY, canvas.width, segmentHeight);
+        let segment_start_y = 0;
+        for(const s of terrainSegments) {
+            if (s.name === segment.name) break;
+            segment_start_y += s.length;
         }
-        currentY -= segment.length;
+
+        const distance_into_segment = world_y_effective - segment_start_y;
+        const remaining_in_segment = segment.length - distance_into_segment;
+
+        const draw_height = Math.min(screen_y_start, remaining_in_segment);
+
+        ctx.fillStyle = segment.color;
+        ctx.fillRect(0, screen_y_start - draw_height, canvas.width, draw_height);
+
+        screen_y_start -= draw_height;
+        world_y_start += draw_height;
     }
 
     // Dibujar y actualizar huellas
