@@ -185,6 +185,42 @@ function getTerrainSegmentAt(yPosition) {
 function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    // --- Definir Horizonte ---
+    const horizonY = canvas.height * 0.4;
+
+    // --- Dibujado ---
+    // 1. Dibujar el cielo
+    const gradient = ctx.createLinearGradient(0, 0, 0, horizonY);
+    gradient.addColorStop(0, '#F7931E');
+    gradient.addColorStop(1, '#FF6B35');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, horizonY);
+
+    // 2. Dibujar Silueta de Montañas (placeholder)
+    ctx.fillStyle = '#4a2e1a'; // Un color oscuro para la silueta
+    ctx.beginPath();
+    ctx.moveTo(0, horizonY);
+    ctx.lineTo(canvas.width * 0.2, horizonY * 0.8);
+    ctx.lineTo(canvas.width * 0.4, horizonY);
+    ctx.lineTo(canvas.width * 0.6, horizonY * 0.7);
+    ctx.lineTo(canvas.width * 0.8, horizonY);
+    ctx.lineTo(canvas.width, horizonY * 0.9);
+    ctx.lineTo(canvas.width, horizonY);
+    ctx.closePath();
+    ctx.fill();
+
+    // 3. Dibujar el suelo con perspectiva
+    for (let y = 0; y < canvas.height - horizonY; y++) {
+        const perspectiveFactor = y / (canvas.height - horizonY);
+        const worldZ = 1 / (1 - perspectiveFactor * 0.99); // Evita división por cero
+        const worldY = cameraY + worldZ * 100; // Ajustar el factor de escala
+
+        const segment = getTerrainSegmentAt(worldY);
+        ctx.fillStyle = segment.color;
+        ctx.fillRect(0, horizonY + y, canvas.width, 1);
+    }
+
+    // --- UI Updates (se mantienen igual) ---
     const distanceMeters = cameraY / PIXELS_PER_METER;
     distanceDisplay.textContent = `👣 Distancia: ${distanceMeters.toFixed(2)} m`;
     const currentTerrain = getTerrainSegmentAt(cameraY);
@@ -193,22 +229,10 @@ function gameLoop() {
     const minutes = Math.floor(elapsedTime / 60000);
     const seconds = Math.floor((elapsedTime % 60000) / 1000);
     timeDisplay.textContent = `⏱️ Tiempo: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    stepsDisplay.textContent = `🚶 Pasos: ${stepsCount}`;
 
-    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    gradient.addColorStop(0, '#F7931E');
-    gradient.addColorStop(1, '#FF6B35');
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    for (let y = 0; y < canvas.height; y++) {
-        const worldY = cameraY + y - canvas.height;
-        if (worldY >= 0) {
-            const segment = getTerrainSegmentAt(worldY);
-            ctx.fillStyle = segment.color;
-            ctx.fillRect(0, y, canvas.width, 1);
-        }
-    }
-
+    // 4. Dibujar y actualizar huellas (lógica a futuro)
     footprints.forEach((footprint, index) => {
         footprint.opacity -= 0.01;
         if (footprint.opacity <= 0) {
