@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const stepSpeedMultiplier = takeStep();
                 // Simulamos el "averageDeltaY" del modo táctil
                 const averageDeltaY = deltaY;
-                cameraY += averageDeltaY * stepSpeedMultiplier;
+                cameraY -= averageDeltaY * stepSpeedMultiplier;
 
                 accumulatedMovementY += Math.abs(averageDeltaY);
                 if (accumulatedMovementY >= STEP_LENGTH_PIXELS) {
@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 const stepSpeedMultiplier = takeStep();
                 const averageDeltaY = (deltaY1 + deltaY2) / 2;
-                cameraY += averageDeltaY * stepSpeedMultiplier;
+                cameraY -= averageDeltaY * stepSpeedMultiplier;
 
                 accumulatedMovementY += Math.abs(averageDeltaY);
                 if (accumulatedMovementY >= STEP_LENGTH_PIXELS) {
@@ -220,7 +220,7 @@ function gameLoop() {
         const distance_in_world = (10000 / (world_z_distance + 1)); // 10000 es un factor de escala para la perspectiva
         
         // La posición en el mundo a muestrear es la posición del jugador + la distancia
-        const worldY_to_sample = cameraY + distance_in_world;
+        const worldY_to_sample = cameraY - distance_in_world;
 
         const segment = getTerrainSegmentAt(worldY_to_sample);
         ctx.fillStyle = segment.color;
