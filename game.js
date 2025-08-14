@@ -171,7 +171,7 @@ function takeStep() {
 function getTerrainSegmentAt(yPosition) {
     let accumulatedLength = 0;
     const totalTerrainLength = terrainSegments.reduce((sum, seg) => sum + seg.length, 0);
-    const effectiveY = totalTerrainLength > 0 ? yPosition % totalTerrainLength : 0;
+    const effectiveY = totalTerrainLength > 0 ? (yPosition % totalTerrainLength + totalTerrainLength) % totalTerrainLength : 0;
 
     for(const segment of terrainSegments) {
         accumulatedLength += segment.length;
