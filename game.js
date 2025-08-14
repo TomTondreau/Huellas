@@ -216,7 +216,8 @@ function gameLoop() {
         // Las líneas más cercanas al horizonte (y_from_horizon pequeño) representan distancias grandes
         // Las líneas más cercanas al jugador (y_from_horizon grande) representan distancias pequeñas
         // Usamos una función inversa para la perspectiva
-        const distance_in_world = (canvas.height - horizonY) / (y_from_horizon + 1) * 50; // +1 para evitar div por cero, 50 es un factor de escala
+        const world_z_distance = (canvas.height - horizonY) - y_from_horizon;
+        const distance_in_world = (10000 / (world_z_distance + 1)); // 10000 es un factor de escala para la perspectiva
         
         // La posición en el mundo a muestrear es la posición del jugador + la distancia
         const worldY_to_sample = cameraY + distance_in_world;
