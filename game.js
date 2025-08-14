@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const stepSpeedMultiplier = takeStep();
                 // Simulamos el "averageDeltaY" del modo táctil
                 const averageDeltaY = deltaY;
-                cameraY -= averageDeltaY * stepSpeedMultiplier;
+                cameraY += averageDeltaY * stepSpeedMultiplier;
 
                 accumulatedMovementY += Math.abs(averageDeltaY);
                 if (accumulatedMovementY >= STEP_LENGTH_PIXELS) {
@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 const stepSpeedMultiplier = takeStep();
                 const averageDeltaY = (deltaY1 + deltaY2) / 2;
-                cameraY -= averageDeltaY * stepSpeedMultiplier;
+                cameraY += averageDeltaY * stepSpeedMultiplier;
 
                 accumulatedMovementY += Math.abs(averageDeltaY);
                 if (accumulatedMovementY >= STEP_LENGTH_PIXELS) {
@@ -209,22 +209,24 @@ function gameLoop() {
     ctx.closePath();
     ctx.fill();
 
-    // 3. Dibujar el suelo con perspectiva (Lógica corregida)
-    // Iteramos desde el horizonte hacia abajo (y_from_horizon = 0 a canvas.height - horizonY)
-    for (let y_from_horizon = 0; y_from_horizon < canvas.height - horizonY; y_from_horizon++) {
-        // Calcular la distancia en el mundo del juego para esta línea de la pantalla
-        // Las líneas más cercanas al horizonte (y_from_horizon pequeño) representan distancias grandes
-        // Las líneas más cercanas al jugador (y_from_horizon grande) representan distancias pequeñas
-        // Usamos una función inversa para la perspectiva
-        const world_z_distance = (canvas.height - horizonY) - y_from_horizon;
-        const distance_in_world = (10000 / (world_z_distance + 1)); // 10000 es un factor de escala para la perspectiva
-        
+    // 3. Dibujar el suelo con perspectiva (Lógica simplificada y directa)
+    // Iteramos desde el horizonte hacia abajo en la pantalla
+    for (let screenY = horizonY; screenY < canvas.height; screenY++) {
+        // Calcular un factor de perspectiva basado en la posición Y en la pantalla
+        // Las líneas más cercanas al horizonte (screenY = horizonY) tienen un factor pequeño
+        // Las líneas más cercanas al jugador (screenY = canvas.height) tienen un factor grande
+        const perspectiveFactor = (screenY - horizonY) / (canvas.height - horizonY);
+
+        // Usamos este factor para determinar qué tan "lejos" estamos en el mundo
+        // y qué tan rápido se mueve el terreno. Un factor de 1000 es arbitrario, se puede ajustar.
+        const worldDistance = perspectiveFactor * 1000; 
+
         // La posición en el mundo a muestrear es la posición del jugador + la distancia
-        const worldY_to_sample = cameraY - distance_in_world;
+        const worldY_to_sample = cameraY + worldDistance;
 
         const segment = getTerrainSegmentAt(worldY_to_sample);
         ctx.fillStyle = segment.color;
-        ctx.fillRect(0, horizonY + y_from_horizon, canvas.width, 1);
+        ctx.fillRect(0, screenY, canvas.width, 1); // Dibuja una línea de 1px de alto
     }
 
     // --- UI Updates (se mantienen igual) ---
