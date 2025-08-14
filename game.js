@@ -31,10 +31,10 @@ let stepsCount = 0;
 let footprints = [];
 
 const terrainSegments = [
-    { name: 'tierra', color: '#D2691E', length: 100 }, // Prueba: Segmento muy corto
-    { name: 'lodo', color: '#8B4513', length: 100 },   // Prueba: Segmento muy corto
-    { name: 'hielo', color: '#A4D8F0', length: 100 },  // Prueba: Segmento muy corto
-    { name: 'adoquin', color: '#696969', length: 100 } // Prueba: Segmento muy corto
+    { name: 'tierra', color: '#D2691E', length: 500 },
+    { name: 'lodo', color: '#8B4513', length: 500 },
+    { name: 'hielo', color: '#A4D8F0', length: 500 },
+    { name: 'adoquin', color: '#696969', length: 500 }
 ];
 
 // --- Lógica de Control Táctil ---
@@ -215,7 +215,7 @@ function gameLoop() {
         // Calcular un factor de perspectiva basado en la posición Y en la pantalla
         // Las líneas más cercanas al horizonte (screenY = horizonY) tienen un factor pequeño
         // Las líneas más cercanas al jugador (screenY = canvas.height) tienen un factor grande
-        const perspectiveFactor = (screenY - horizonY) / (canvas.height - horizonY);
+        const perspectiveFactor = 1 - ((screenY - horizonY) / (canvas.height - horizonY));
 
         // Usamos este factor para determinar qué tan "lejos" estamos en el mundo
         // y qué tan rápido se mueve el terreno. Un factor de 1000 es arbitrario, se puede ajustar.
