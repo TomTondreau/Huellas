@@ -39,10 +39,10 @@ let stepsCount = 0; // Contador de pasos
 
 // Definición de los segmentos de terreno (color y longitud)
 const terrainSegments = [
-    { name: 'tierra', color: '#966939', length: 1600 },
-    { name: 'lodo', color: '#5C4033', length: 1600 },
-    { name: 'hielo', color: '#FFFFFF', length: 1600 },
-    { name: 'adoquin', color: '#505050', length: 1600 }
+    { name: 'tierra', color: '#D2691E', length: 1600 }, // Ocre/Marrón de Firewatch
+    { name: 'lodo', color: '#8B4513', length: 1600 },   // Marrón oscuro de Firewatch
+    { name: 'hielo', color: '#A4D8F0', length: 1600 },  // Azul claro inspirado en la paleta
+    { name: 'adoquin', color: '#696969', length: 1600 } // Gris urbano de Firewatch
 ];
 
 
@@ -187,10 +187,10 @@ function gameLoop() {
     const seconds = Math.floor((elapsedTime % 60000) / 1000);
     timeDisplay.textContent = `⏱️ Tiempo: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
-    // Dibujar el cielo (degradado)
+    // Dibujar el cielo (degradado inspirado en Firewatch)
     const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    gradient.addColorStop(0, '#fab77a'); // Color superior (atardecer)
-    gradient.addColorStop(1, '#ff8c00'); // Color inferior (horizonte)
+    gradient.addColorStop(0, '#F7931E'); // Naranja cálido superior
+    gradient.addColorStop(1, '#FF6B35'); // Naranja cálido inferior
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
